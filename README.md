@@ -12,7 +12,7 @@ The main purpose of the codein this repository is to:
 The energy consumption models are saved to the models directory. Each of the models uses a different number of features to predict the energy consumption of the milling machine. For this reason, some of the models will perform better than others.
 
 ## Usage
-Clone the repository and setup the dependancies
+Clone the repository and setup the dependencies
 ```
 git clone https://github.com/maxkferg/milling-energy-prediction
 git submodule init

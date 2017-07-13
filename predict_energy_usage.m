@@ -867,13 +867,15 @@ for index=1:length(clean_models)
     figure(); hold on;
     spindle = 2400;
     feed_range = 0:1:1000;
-    x_fabricated = [feed_range',spindle*ones(length(feed_range),1), 1*ones(length(feed_range),1),1*ones(length(feed_range),1), 1*ones(length(feed_range),1)];
     model = clean_models{index};
+    % Generate x values to use in the plot
+    x_fabricated = ones(length(feed_range),length(model.hyp.cov)-1);
+    x_fabricated(:,1) = feed_range';
     % Generate scores using the PMML model
     [m, s] = model.score(x_fabricated);
     plot(feed_range,m,'--r','linewidth',1.5)
     % Plot observed values and legend
-    %plot(feed(index_11),density(index_11),'ob','Linewidth',1.5)
+    % plot(feed(index_11),density(index_11),'ob','Linewidth',1.5)
     legend('Measured','Predicted mean')
     % plot variance without legend
     plot_variance(feed_range,(m-sqrt(s))',(m+sqrt(s))','r')
