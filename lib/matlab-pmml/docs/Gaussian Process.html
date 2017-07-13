@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:prehtml="http://dmg.org/prehtml" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<head>
+  <meta http-equiv="content-type" content= "application/xhtml+xml; charset=utf-8" />
+  <prehtml:title>Gaussian Process Models</prehtml:title>
+</head>
+
+<body>
+  
+		<p>Gaussian process (GP) is a stochastic process with a collection of random variables. Any finite number of those random variables has a joint 
+		Gaussian distribution. The probabilistic representation of a target function can be used for both regression and classification.</p>
+
+		<p>In GP, the target response y is assumed to be the noisy evaluation of the target function, i.e., <i>y = f(<b>x</b>)+ϵ</i>, where <i>ϵ~N(0,σ<sub><small>ϵ</small></sub>
+		<sup><small>2</small></sup>)</i>. The prior on the function values is represented as Gaussian Process, i.e., <i>p(<b>f</b>) = GP(m(∙),k(∙,∙))</i>, where <i>m(∙)</i> is a 
+		mean function and <i>k(∙,∙)</i> is a kernel function (in this document, we assume the zero mean function <i>m(∙) = 0</i>). The likelihood function of the measured response 
+		is represented as a Gaussian distribution, i.e., <i>p(<b>y</b>|<b>f</b>) = N(<b>f</b>,σ<sub><small>ϵ</small></sub><sup><small>2</small></sup>)</i>. 
+		Given the historical data <i>D = {(<b>x</b><sub><small>i</small></sub>, y<sub><small>i</small></sub> )| i = 1,…,n}</i>, the posterior distribution on the target value <i>y<sub><small>new</small>
+		</sub> = f(<b>x</b><sub><small>new</small></sub> )+ϵ</i> corresponding to the new test data input <i><b>x</b><sub><small>new</small></sub></i> can be represented with an 1-D probability 
+		distribution as:</p>
+
+		<blockquote>
+			<i>y<sub><small>new</small></sub>~N(μ(<b>x</b><sub><small>new</small></sub>|D),σ<sup><small>2</small></sup>(<b>x</b><sub><small>new</small></sub>|D))</i>
+		</blockquote>
+
+		<p>The mean <i>μ(<b>x</b><sub><small>new</small></sub>|D)</i> and the variance <i>σ<sup><small>2</small></sup>(x<sub><small>new</small></sub>|D)</i> represent the predicted mean and 
+		the variance of <i>y<sub><small>new</small></sub></i> corresponding to the test point <i><b>x</b><sub><small>new</small></sub></i>, each of which can be expressed as:
+
+		<blockquote>
+			<i>μ(<b>x</b><sub><small>new</small></sub>|D) = <b>k</b><sup><small>T</small></sup>(<b>K</b>+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup><b>I</b>)<sup><small>-1</small></sup><b>y</b><sub>
+			<small>1:n</small></sub></i><br/>
+			<i>σ<sup><small>2</small></sup>(<b>x</b><sub><small>new</small></sub>|D) = k(<b>x</b><sub><small>new</small></sub>, <b>x</b><sub><small>new</small></sub>) - <b>k</b><sup><small>T</small></sup>
+			(<b>K</b>+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup><b>I</b>)<sup><small>-1</small></sup><b>k</b>+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup></i>
+		</blockquote>
+
+			
+where  <i><b>k</b><sup><small>T</small></sup>  = (k(<b>x</b><sub><small>1</small></sub>,<b>x</b><sub><small>new</small></sub> ),...,k(<b>x</b><sub><small>n</small></sub>,<b>x</b><sub><small>new</small></sub>))</i>
+ is the vector containing kernel evaluations between the training inputs <i><b>x</b><sub><small>i</small></sub>,…,<b>x</b><sub><small>n</small></sub></i> and the test feature vectors 
+ <i><b>x</b><sub><small>new</small></sub></i>; <b>K</b> is the covariance matrix (kernel matrix) whose <i>(i,j)<sup><small>th</small></sup></i> entry is <i><b>K</b><sub><small>ij</small></sub>  = 
+ k(<b>x</b><sub><small>i</small></sub>,<b>x</b><sub><small>j</small></sub> ); and <b>y</b><sub><small>1:n</small></sub></i> are the training target responses.</p>
+
+<p>For the Gaussian Process Regression (GPR), note that to perform scoring procedure for a new data set <i>D<sup><small>new</small></sup>={(<b>x</b><sub><small>i</small></sub><sup><small>new</small></sup>,y<sub><small>i</small></sub><sup><small>new</small></sup>)|i=1,…,m}</i>,  the following are required, namely training data set, the type of kernel function used for training, optimal values of the hyper-parameters of the kernel function, and noise variance. That is to represent a GP regression model, the following information should be stored in the PMML file:
+<ul>
+	<li>Training data <i>D={(<b>x</b><sub><small>i</small></sub>,y<sub><small>i</small></sub> )|i=1,…,n}</i>. Training data can be represented as input data matrix <b>X</b>, 
+	whose i<sup><small>th</small></sup> row represents i<sup><small>th</small></sup> input <b><i>x</i></b><sub><small>i</small></sub>, and the target response vector 
+	<b><i>y</i></b>={<i>y</i><sub><small>i</small></sub>,…,<i>y</i><sub><small>n</small></sub>}.</li>
+	<li>The type of a kernel function used to describe the underlying structure of a target function.</li>
+	<li>The hyper-parameters for the specified kernel function.</li>
+	<li>The noise variance representing the error magnitude in the response.</li>
+	<li>The specification supports this by introducing a common GaussianProcessDictionary.</li>
+</ul>
+</p>
+  
+<prehtml:schema><xs:element name="GaussianProcessModel">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="MiningSchema"/>
+      <xs:element ref="Output" minOccurs="0"/>
+      <xs:element ref="ModelStats" minOccurs="0"/>
+      <xs:element ref="ModelExplanation" minOccurs="0"/>
+      <xs:element ref="Targets" minOccurs="0"/>
+      <xs:element ref="LocalTransformations" minOccurs="0"/>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="RadialBasisKernel"/>
+          <xs:element ref="ARDSquaredExponentialKernel"/>
+          <xs:element ref="AbsoluteExponentialKernel"/>
+          <xs:element ref="GeneralizedExponentialKernel"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:element ref="TrainingInstances"/>
+      <xs:element ref="ModelVerification" minOccurs="0"/>
+      <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="modelName" type="xs:string" use="optional"/>
+    <xs:attribute name="functionName" type="MINING-FUNCTION" use="required"/>
+    <xs:attribute name="optimizer" type="xs:string" use="optional"/>
+    <xs:attribute name="isScorable" type="xs:boolean" default="true"/>
+  </xs:complexType>
+</xs:element>
+</prehtml:schema>
+
+<p>Among the pre-existing elements, the following elements need to be specified for Gaussian Process model:
+<ul>
+	<li>The attribute <b>modelName</b> specifies the name of the Gaussian Process model.</li>
+	<li>The attribute <b>functionName</b> could be either classification or regression depending on the Gaussian process model type.</li>
+	<li>The attribute <b>optimizer</b> specifies the optimization algorithm used in training the Gaussian process model.</li>
+	<li>Since Gaussian process requires numeric attributes, which could be normalized, transformations are often applied.  
+	The transformation can be performed in the <b>LocalTransformations</b> element.</li>
+</ul>
+</p>
+
+<h3>Kernel Types</h3>
+
+ <p>A kernel function defines the function space that GP regression can represent, thus impacting the accuracy of the prediction model. 
+ Wide variety of kernel functions can be used. Here, we describe the four kernel functions that are commonly used for GP regression:</p>
+ <blockquote>
+	<dl>
+      <dt><br/>
+      <b>RadialBasisKernel</b>: squared exponential basis function (p is the number of input variables)</dt>
+      <dd><i>k(<b>x</b>,<b>z</b>)=γ exp(-1/2 (Sum[(i=1)to p]( |x<sub><small>i</small></sub>-z<sub><small>i</small></sub>| /<i>λ</i>)<sup><small>2</small></sup>))</i></dd>
+
+      <dt><br/>
+      <b>ARDSquaredExponentialKernel</b>: Automatic Relevance Determination (ARD) squared exponential basis function. This covariance function is the squared exponential kernel function with a separate lengthscale hyper-parameter, <i>λ</i><sub><small>i</small></sub>, for each predictor, i.e. input dimension <i>x</i><sub><small>i</small></sub></dt>
+      <dd><i>k(<b>x</b>,<b>z</b>)=γ exp(-1/2 (Sum[(i=1)to p]( |x<sub><small>i</small></sub>-z<sub><small>i</small></sub>| /<i>λ</i><sub><small>i</small></sub>)<sup><small>2</small></sup>))</i></dd>
+
+      <dt><br/>
+      <b>AbsoluteExponentialKernel</b>: absolute exponential basis function</dt>
+      <dd><i>k(<b>x</b>,<b>z</b>)=γ exp(-1/2 (Sum[(i=1)to p]( |x<sub><small>i</small></sub>-z<sub><small>i</small></sub>| /<i>λ</i><sub><small>i</small></sub>))</i></dd>
+	  
+	  <dt><br/>
+      <b>GeneralizedExponentialKernel</b>: generalized exponential basis function</dt>
+      <dd><i>k(<b>x</b>,<b>z</b>)=γ exp(-1/2 (Sum[(i=1)to p]( |x<sub><small>i</small></sub>-z<sub><small>i</small></sub>| /<i>λ</i><sub><small>i</small></sub>)<sup><small>degree</small></sup>))</i></dd>
+    </dl>
+  </blockquote>
+
+<p>When GP regression is used to fit input and noisy output, the noise variance should be specified. The noise term is assumed to follow Gaussian distribution and be 
+independent and identically distributed. Note that constructing the covariance matrix <i><b>K</b>+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup><b>I</b></i> is equivalent to 
+using the kernel function augmented with the noise variance, i.e., <i>k(x,z)= k(x,z)+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup>  (if x = z)</i>.  Thus, the 
+noise variance term σ<sub><small>ϵ</small></sub><sup><small>2</small></sup> is included to the hyper-parameters for each kernel function.</p>
+<p>The aforementioned four kernel functions are expressed as the following PMML schema:</p>
+ 
+<prehtml:schema><xs:element name="RadialBasisKernel">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+    <xs:attribute name="gamma" type="REAL-NUMBER" use="optional" default="1"/>
+    <xs:attribute name="noiseVariance" type="REAL-NUMBER" use="optional" default="1"/>
+    <xs:attribute name="lambda" type="REAL-NUMBER" use="optional" default="1"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ARDSquaredExponentialKernel">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="Lambda" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+    <xs:attribute name="gamma" type="REAL-NUMBER" use="optional" default="1"/>
+    <xs:attribute name="noiseVariance" type="REAL-NUMBER" use="optional" default="1"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="AbsoluteExponentialKernel">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="Lambda" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+    <xs:attribute name="gamma" type="REAL-NUMBER" use="optional" default="1"/>
+    <xs:attribute name="noiseVariance" type="REAL-NUMBER" use="optional" default="1"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="GeneralizedExponentialKernel">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="Lambda" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="description" type="xs:string" use="optional"/>
+    <xs:attribute name="gamma" type="REAL-NUMBER" use="optional" default="1"/>
+    <xs:attribute name="noiseVariance" type="REAL-NUMBER" use="optional" default="1"/>
+    <xs:attribute name="degree" type="REAL-NUMBER" use="optional" default="1"/>
+  </xs:complexType>
+</xs:element>
+</prehtml:schema>
+
+<p>Element <b>Lambda</b> is defined as following:</p>
+
+<prehtml:schema><xs:element name="Lambda">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:group ref="REAL-ARRAY"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+</prehtml:schema>
+
+<p>Additional information about the kernel can be entered in the free type
+  attribute <b>description</b>.</p>
+
+  <h3>Training Instances</h3>
+
+  <p>The element <b>TrainingInstances</b> refers to the element defined in KNN model documentations.</p>
+
+<p>Element <tt>TrainingInstances</tt> encapsulates the definition of the
+  fields included in the training instances as well as their values.</p>
+
+  <h4>Definitions</h4>
+
+  <ul>
+    <li><b><a id="istransformed">isTransformed</a></b>: Used as a flag to
+    determine whether or not the training instances have already been
+    transformed. If <b>isTransformed</b> is "false", it indicates that the
+    training data has not been transformed yet. If "true", it indicates that it
+    has already been transformed.</li>
+
+    <li><b><a id="recordcount">recordCount</a></b>: Defines the number of
+    training instances or records. This number needs to match the number of
+    instances defined in the element <tt>InlineTable</tt> or in the external
+    data if <tt>TableLocator</tt> is used.</li>
+
+    <li><b><a id="fieldcount">fieldCount</a></b>: Defines the number of fields
+    (features + targets). This number needs to match the number of
+    <tt>InstanceField</tt> elements defined under <tt>InstanceFields</tt>.</li>
+	</ul>
+
+<p>Each <b>InstanceFields</b> and <b>InstanceField</b> refer to elements defined in KNN.</p>
+
+<p>The <tt>InstanceFields</tt> element serves as an envelope for all the
+  fields included in the training instances. It encapsulates
+  <tt>InstanceField</tt> elements.</p>
+
+  <h4>Definitions</h4>
+
+  <p><ul>
+    <li><b>field</b>: Contains the name of a <tt>DataField</tt> or a
+    <tt>DerivedField</tt> (in case <b>isTransformed</b> is set to "true"). Can
+    also contain the name of the case ID variable.</li>
+
+    <li><b>column</b>: Defines the name of the tag or column used by element
+    <tt>InlineTable</tt>. This attribute is required if element
+    <tt>InlineTable</tt> is used to represent training data.</li>
+  </ul></p>
+  
+  <p>The element <tt>TrainingInstances</tt> offers a choice of PMML elements
+  when it comes to representing the training data (feature vectors and class
+  labels). These are:</p>
+
+  <ul>
+    <li><b>InlineTable</b>: Allows for the training instances to be part of the
+    PMML document itself. When used in k-NN models, a row in an
+    <tt>InlineTable</tt> should contain a sequence of elements representing the
+    input fields. Each tag or column, as given by attribute <b>column</b> of
+    element <tt>InstanceField</tt>, corresponds to a <b>field</b> name. The
+    content of an element defines the field value.</li>
+
+    <li><b>TableLocator</b>: Allows for the training data to be stored in an
+    external table. Such a table can then be referenced by the
+    <tt>TableLocator</tt> element which implements a kind of URL for
+    tables.</li>
+  </ul>
+
+  <p>For more information on elements <tt>InlineTable</tt> and
+  <tt>TableLocator</tt>, refer to <a href="Taxonomy.html">Taxonomy</a>.</p>
+
+<h3>Example Model</h3>
+
+ <p>In this example, the training procedure of a GP regression model, the representation of the trained GP regression model with PMML file, and the scoring procedure using the represented GP 
+regression model are introduced. To illustrate these procedures, two training data points with input vectors <i>{<b>x</b><sub><small>1</small></sub>=(1,3), <b>x</b><sub><small>2</small></sub>=(2,6)}</i> and target response 
+{<i>y</i><sub><small>1</small></sub>=1, <i>y</i><sub><small>2</small></sub>=2} are used. 
+The ARD squared exponential kernel function <i>k(<b>x</b>,<b>z</b>)=γ exp(-1/2 (Sum[(i=1)to p]( |x<sub><small>i</small></sub>-z<sub><small>i</small></sub>| /<i>λ</i><sub><small>i</small></sub>)<sup><small>2</small></sup>))</i> is used, and its optimum hyper-parameters <i><b>θ</b><sup><small>*</small></sup> = (γ<sup><small>*</small></sup>,
+<b><i>λ</i></b><sup><small>*</small></sup>,σ<sub><small>ϵ</small></sub><sup><small>*</small></sup>)</i> are computed using the training data points.</p>
+
+<p>Using two training points with input vectors <i>{<b>x</b><sub><small>1</small></sub> = (1,3), <b>x</b><sub><small>2</small></sub> = (2,6)}</i> and target response 
+<i>{y<sub><small>1</small></sub> = 1, y<sub><small>2</small></sub> = 2}</i>, the optimum hyper-parameters <i><b>θ</b><sup><small>*</small></sup> = (γ<sup><small>*</small></sup>,
+<b><i>λ</i></b><sup><small>*</small></sup>,σ<sub><small>ϵ</small></sub><sup><small>*</small></sup>)</i> for the ARD squared exponential kernel function are determined as <i>γ<sup><small>*
+</small></sup> = 2.4890, <b><i>λ</i></b><sup><small>*</small></sup> = (1.5164,59.3113)</i> and <i>σ<sub><small>ϵ</small></sub><sup><small>*</small></sup>= 0.1051</i>. 
+The noise variance is <i>(σ<sub><small>ϵ</small></sub><sup><small>*</small></sup>)<sup><small>2</small></sup> = (0.1051)<sup><small>2</small></sup> = 0.0110.</i></p>
+
+<p>This information is now represented in the following PMML file:</p>
+  
+<prehtml:example><PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+<Header copyright="DMG.org" />
+  <DataDictionary numberOfFields="3">
+    <DataField dataType="double" name="x1" optype="continuous"/>
+    <DataField dataType="double" name="x2" optype="continuous"/>
+    <DataField dataType="double" name="y1" optype="continuous"/>
+  </DataDictionary>
+  <GaussianProcessModel modelName="Gaussian Process Model" functionName="regression">
+    <MiningSchema>
+      <MiningField name="x1" usageType="active"/>
+      <MiningField name="x2" usageType="active"/>
+      <MiningField name="y1" usageType="predicted"/>
+    </MiningSchema>
+    <Output>
+      <OutputField dataType="double" feature="predictedValue" name="MeanValue" optype="continuous"/>
+      <OutputField dataType="double" feature="predictedValue" name="StandardDeviation" optype="continuous"/>
+    </Output>
+    <ARDSquaredExponentialKernel gamma="2.4890" noiseVariance ="0.0110">
+      <Lambda>
+        <Array n="2" type="real">1.5164 59.3113</Array>
+      </Lambda>
+    </ARDSquaredExponentialKernel>
+    <TrainingInstances recordCount="2" fieldCount="3" isTransformed="false">
+      <InstanceFields>
+        <InstanceField field="x1" column="x1"/>
+        <InstanceField field="x2" column="x2"/>
+        <InstanceField field="y1" column="y1"/>
+      </InstanceFields>
+      <InlineTable>
+        <row>
+          <x1>1</x1>
+          <x2>3</x2>
+          <y1>1</y1>
+        </row>
+        <row>
+          <x1>2</x1>
+          <x2>6</x2>
+          <y1>2</y1>
+        </row>
+      </InlineTable>
+    </TrainingInstances>
+  </GaussianProcessModel>
+</PMML>
+</prehtml:example>
+
+<p>The optimized hyper-parameters are stored under the element of <b>ARDSquaredExponentialKernel</b>. Note that the <b>noiseVariance</b> in PMML file denotes <i>
+(σ<sub><small>ϵ</small></sub><sup><small>*</small></sup>)<sup><small>2</small></sup>=(0.1051)<sup><small>2</small></sup>=0.0110.</i>
+</p>
+
+<h3>Scoring procedure, example</h3>
+<p>We assume that the training data, a kernel function type and its optimum hyper-parameters are retrieved from the given PMML file. 
+Considering the same example as above, the scoring procedure at the new test inputs <i><b>x</b><sub><small>new</small></sub>= (1, 4)</i> is illustrated. 
+
+The target response <i>y<sub><small>new</small></sub></i> corresponding to the new input <i><b>x</b><sub><small>new</small></sub></i> follows the following 1-D posterior distribution:</p>
+
+		<blockquote>
+			<i>y<sub><small>new</small></sub>~N(μ(<b>x</b><sub><small>new</small></sub>|D),σ<sup><small>2</small></sup>(<b>x</b><sub><small>new</small></sub>|D))</i>
+		</blockquote>
+
+<p>where:</p>
+
+		<blockquote>
+			<i>μ(<b>x</b><sub><small>new</small></sub>|D) = <b>k</b><sup><small>T</small></sup>(<b>K</b>+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup><b>I</b>)<sup><small>-1</small></sup><b>y</b><sub>
+			<small>1:n</small></sub></i><br/>
+			<i>σ<sup><small>2</small></sup>(<b>x</b><sub><small>new</small></sub>|D) = k(<b>x</b><sub><small>new</small></sub>, <b>x</b><sub><small>new</small></sub>) - <b>k</b><sup><small>T</small></sup>
+			(<b>K</b>+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup><b>I</b>)<sup><small>-1</small></sup><b>k</b>+σ<sub><small>ϵ</small></sub><sup><small>2</small></sup></i>
+		</blockquote>
+
+<p>With the optimized hyper-parameters <i><b>θ</b><sup><small>*</small></sup> = (γ<sup><small>*</small></sup> = 2.4890,<b><i>λ</i></b><sup><small>*</small></sup> = (1.5164,59.3113),σ<sub><small>ϵ</small></sub><sup><small>*</small></sup> = 0.1051)</i> and the training inputs, <i><b>x</b><sub><small>1</small></sub>  and <b>x</b><sub><small>2</small></sub></i>, the covariance matrix augmented 
+with the noise variance, <i><b>K</b>+σ<sub><small>ϵ</small></sub><sup><small>*</small></sup><b>I</b></i>, is constructed as:</p>
+
+<blockquote>
+	<i><b>K</b><sub><small>11</small></sub>  = k(<b>x</b><sub><small>1</small></sub>,<b>x</b><sub><small>1</small></sub>) = 2.4890*exp(0) = 2.4890</i><br/>
+	<i><b>K</b><sub><small>12</small></sub>  = k(<b>x</b><sub><small>1</small></sub>,<b>x</b><sub><small>2</small></sub>) = 2.4890*exp(-1/2 ((1-2)<sup><small>2</small></sup>/(1.5164)
+	<sup><small>2</small></sup> +(3-6)<sup><small>2</small></sup>/(59.3113)<sup><small>2</small></sup>)) = 2.0000</i><br/>
+	<i><b>K</b><sub><small>22</small></sub>  = k(<b>x</b><sub><small>2</small></sub>,<b>x</b><sub><small>2</small></sub>) = 2.4890*exp(0) = 2.4890</i><br/>
+	<i><b>K</b><sub><small>21</small></sub>  = k(<b>x</b><sub><small>2</small></sub>,<b>x</b><sub><small>1</small></sub>) = 2.4890*exp(-1/2 ((2-1)<sup><small>2</small></sup>
+	/(1.5164)<sup><small>2</small></sup> +(6-3)<sup><small>2</small></sup>/(59.3113)<sup><small>2</small></sup>)) = 2.0000</i>
+</blockquote>
+
+<p>which gives</p>
+
+<i><b>K</b>+σ<sub><small>ϵ</small></sub><sup><small>*</small></sup><b>I</b> = [(2.4890&amp;2.0000@2.0000&amp;2.4890)]+(0.1051)<sup><small>2</small></sup> [(1&amp;0@0&amp;1)] = [(2.5000&amp;2.000@2.0000&amp;2.5000)]</i>
+
+<p>When  <i><b>x</b><sub><small>new</small></sub>=(1,4)</i>, the vector <i><b>k</b><sup><small>T</small></sup></i> containing the kernel evaluations between the training inputs and test input 
+is computed as</p>
+
+<blockquote>
+<i><b>k</b><sup><small>T</small></sup>  = (k(<b>x</b><sub><small>1</small></sub>,<b>x</b><sub><small>new</small></sub> ),k(<b>x</b><sub><small>2</small></sub>,<b>x</b><sub><small>new</small></sub>)) = (2.4886,2.0014)</i>
+</blockquote>
+
+<p>Then, the predicted mean <i>μ(<b>x</b><sub><small>new</small></sub>|D)</i> and variance <i>σ<sup><small>2</small></sup>(<b>x</b><sub><small>new</small></sub>|D)</i>
+ of <i>y<sub><small>new</small></sub> at <b>x</b><sub><small>new</small></sub>=(1,4)</i> can be computed as</p>
+
+		<blockquote>
+			<i>μ(<b>x</b><sub><small>new</small></sub>|D) = (2.4886,2.0014) [(2.5000&amp;2.000@2.0000&amp;2.5000)]<sup><small>(-1)</small></sup> ((1@2)) = 1.0095</i><br/>
+			<i>σ<sup><small>2</small></sup>(<b>x</b><sub><small>new</small></sub>|D) = 2.4890-(2.4886,2.0014)<sup><small>T</small></sup>[(2.5000&amp;2.000@2.0000&amp;2.5000)]<sup><small>(-1)</small></sup> ((2.4886@2.0014))+(0.1051)<sup><small>2</small></sup> = 0.0226</i>
+		</blockquote>
+
+<p>Based on the estimated mean value and the variance, the 95% confidence bound for <i>y<sub><small>new</small></sub></i> can be expressed as: 
+<i>[μ(<b>x</b><sub><small>new</small></sub>|D) - 1.96σ(<b>x</b><sub><small>new</small></sub>|D),μ(<b>x</b><sub><small>new</small></sub>|D) + 1.96σ(<b>x</b><sub><small>new</small></sub>|D)] = [0.7148,1.3042].</i>
+</p>
+</body>
+</html>

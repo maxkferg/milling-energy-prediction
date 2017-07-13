@@ -1,0 +1,28 @@
+<xs:element name="GaussianProcessModel">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="MiningSchema"/>
+			<xs:element ref="Output" minOccurs="0"/>
+			<xs:element ref="ModelStats" minOccurs="0"/>
+			<xs:element ref="ModelExplanation" minOccurs="0"/>
+			<xs:element ref="Targets" minOccurs="0"/>
+			<xs:element ref="LocalTransformations" minOccurs="0"/>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element ref="RadialBasisKernel"/>
+					<xs:element ref="ARDSquaredExponentialKernel"/>
+					<xs:element ref="AbsoluteExponentialKernel"/>
+					<xs:element ref="GeneralizedExponentialKernel"/>
+				</xs:choice>
+			</xs:sequence>
+			<xs:element ref="TrainingInstances"/>
+			<xs:element ref="ModelVerification" minOccurs="0"/>
+			<xs:element ref="Extension" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="modelName" type="xs:string" user="optional"/>
+		<xs:attribute name="functionName" type="MINING-FUNCTION" use="required"/>
+		<xs:attribute name="optimizer" type="xs:string" use="optional"/>
+		<xs:attribute name="isScorable" type="xs:boolean" default="true"/>
+	</xs:complexType>
+</xs:element>
